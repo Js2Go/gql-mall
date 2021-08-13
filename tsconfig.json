@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "types": ["@types/*.d.ts", "@types/jest"],
+    "target": "es5",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    // "paths": {
+    //   "@middleware/*": ["src/middleware/*"],
+    //   "@controller/*": ["src/controller/*"],
+    //   "@service/*": ["src/service/*"],
+    //   "@router/*": ["src/router/*"],
+    //   "@util/*": ["src/util/*"],
+    // }
+  },
+}
