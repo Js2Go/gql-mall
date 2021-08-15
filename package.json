@@ -7,14 +7,15 @@
     "test": "jest"
   },
   "dependencies": {
+    "apollo-server-koa": "^3.1.2",
+    "graphql": "^15.5.1",
     "koa": "^2.13.1",
-    "koa-router": "^10.0.0",
     "ts-node": "^10.2.0"
   },
   "devDependencies": {
     "@types/jest": "^27.0.1",
     "@types/koa": "^2.13.4",
-    "@types/koa-router": "^7.4.4",
+    "@types/node": "^16.6.1",
     "jest": "^27.0.6",
     "nodemon": "^2.0.12",
     "ts-jest": "^27.0.4",

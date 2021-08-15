@@ -1,7 +1,7 @@
 import { ParameterizedContext } from 'koa'
-import Router, { IRouterOptions } from 'koa-router'
+import Router, { RouterOptions, Middleware } from '@koa/router'
 
-export const wrapper: (ff: (c: ParameterizedContext) => Promise<unknown>) => Router.IMiddleware = f => {
+export const wrapper: (ff: (c: ParameterizedContext) => Promise<unknown>) => Middleware = f => {
   return async (ctx, next) => {
     await f(ctx)
     await next()
@@ -9,7 +9,7 @@ export const wrapper: (ff: (c: ParameterizedContext) => Promise<unknown>) => Rou
 }
 
 class mRouter extends Router {
-  constructor(opts?: IRouterOptions) {
+  constructor(opts?: RouterOptions) {
     super(opts)
   }
 

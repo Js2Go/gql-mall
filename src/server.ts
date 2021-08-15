@@ -1,32 +1,69 @@
 import Koa from 'koa'
-import cors from './middleware/cors'
-import homeRoute from './router/home'
+import { ApolloServer, gql } from 'apollo-server-koa'
+import { DocumentNode } from 'graphql'
 
-const app = new Koa()
 const PORT = 8899
 
-app
-  .use(cors())
-  .use(homeRoute.routes()).use(homeRoute.allowedMethods())
+const typeDefs = gql`
+  # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
 
-const runServer = (port: number): (p: number) => void => {
-  const start = (p: number) => {
-    const server = app.listen(p, () => {
-      console.log(`server listening port at ${p}`)
-    })
-
-    server.on('error', err => {
-      if (~err.message.indexOf('EADDRINUSE')) {
-        port++
-        console.log(`server port ${PORT} is used, now using port ${port}`)
-        start(port)
-      }
-    })
+  # This "Book" type defines the queryable fields for every book in our data source.
+  type Book {
+    title: String
+    author: String
   }
 
-  start(port)
+  # The "Query" type is special: it lists all of the available queries that
+  # clients can execute, along with the return type for each. In this
+  # case, the "books" query returns an array of zero or more Books (defined above).
+  type Query {
+    books: [Book]
+  }
+`
 
-  return start
+const books = [
+  {
+    title: 'The Awakening',
+    author: 'Kate Chopin',
+  },
+  {
+    title: 'City of Glass',
+    author: 'Paul Auster',
+  },
+]
+
+const resolvers = {
+  Query: {
+    books: () => books,
+  },
 }
 
-runServer(PORT)
+interface AS {
+  server: ApolloServer
+  app: Koa
+}
+
+async function startApolloServer(typeDefs: DocumentNode, resolvers: any, port: number): Promise<AS> {
+  const server = new ApolloServer({ typeDefs, resolvers })
+  await server.start()
+  const app = new Koa()
+  server.applyMiddleware({ app, cors: true, bodyParserConfig: true })
+  await new Promise((resolve: (val: void) => void) => {
+    const start = (p: number) => {
+      const s = app.listen({ port: p }, resolve)
+      s.on('error', err => {
+        if (~err.message.indexOf('EADDRINUSE')) {
+          p++
+          console.log(`server port ${p} is used, now using port ${p}`)
+          console.log(`🚀 Server ready at http://localhost:${p}${server.graphqlPath}`)
+          startApolloServer(typeDefs, resolvers, p)
+        }
+      })
+    }
+
+    start(port)
+  })
+  return { server, app }
+}
+
+startApolloServer(typeDefs, resolvers, PORT)
