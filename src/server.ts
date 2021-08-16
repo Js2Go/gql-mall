@@ -5,10 +5,10 @@ import { IResolvers } from '@graphql-tools/utils'
 import { BaseRedisCache } from 'apollo-server-cache-redis'
 import Redis from 'ioredis'
 import { GraphQLUpload, graphqlUploadKoa } from 'graphql-upload'
-import stream from 'stream'
+import promises from 'stream/promises'
 
-import MoviesAPI from './datasource/movies'
-import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core/dist/plugin/landingPage/graphqlPlayground'
+// import MoviesAPI from './datasource/movies'
+// import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core/dist/plugin/landingPage/graphqlPlayground'
 
 // import upperDirective from './directive/upperDirective'
 
@@ -161,10 +161,9 @@ const resolvers: IResolvers = {
     singleUpload: async (parent, { file }) => {
       const { createReadStream, filename, mimetype, encoding } = await file
       const stream = createReadStream()
-      const out = (await import('fs')).createWriteStream('local-file-output.txt')
+      const out = (await import('fs')).createWriteStream(filename)
       stream.pipe(out)
-      // await promises.finished(out)
-      await stream.promises.finished(out)
+      await promises.finished(out)
 
       return { filename, mimetype, encoding }
     }
@@ -193,9 +192,9 @@ async function startApolloServer(typeDefs: DocumentNode, resolvers: IResolvers, 
       }
       return err
     },
-    plugins: [
-      ApolloServerPluginLandingPageGraphQLPlayground({})
-    ]
+    // plugins: [
+    //   ApolloServerPluginLandingPageGraphQLPlayground({})
+    // ]
     // ts-node has a bug need to fix, so I can't use dataSources option
     // dataSources: () => {
     //   return {
