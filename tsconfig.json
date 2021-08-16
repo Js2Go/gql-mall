@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "types": ["src/@types/*.d.ts", "@types/jest"],
+    "types": ["@types/jest"],
     "target": "es5",
     "module": "commonjs",
     "strict": true,

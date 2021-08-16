@@ -1,0 +1,4 @@
+type Query {
+  allMedia: [Media]
+  books: [Book!] # Can include Textbook objects
+}

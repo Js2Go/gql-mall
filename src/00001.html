@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <input type="file" name="" id="file">
+  <script>
+    const fileDoc = document.getElementById('file')
+
+    fileDoc.onchange = e => {
+      const f = new FormData()
+      f.append('file', e.target.files[0], e.target.files[0].name)
+      JSON.parse(graphql).variables.singleUploadFile = f.get('file')
+      console.log(JSON.parse(graphql).variables.singleUploadFile)
+      // load()
+    }
+
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "multipart/form-data");
+
+    var graphql = JSON.stringify({
+      query: "mutation SingleUploadMutation($singleUploadFile: Upload!) {singleUpload(file: $singleUploadFile) {filename mimetype encoding}}",
+      variables: {
+        singleUploadFile: ''
+      }
+    })
+    var requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: graphql,
+      redirect: 'follow'
+    };
+
+    function load() {
+      fetch("http://localhost:8899/graphql", requestOptions)
+        .then(response => response.text())
+        .then(result => console.log(result))
+        .catch(error => console.log('error', error));
+    }
+  </script>
+</body>
+
+</html>

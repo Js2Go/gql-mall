@@ -1,9 +1,10 @@
 import Router from '../util/router'
-import { h, hh } from '../controller/home'
+import { h, hh, hhh } from '../controller/home'
 
-const homeRoute = new Router({ prefix: '/home' })
+const homeRoute = new Router({ prefix: '/movies' })
 
 homeRoute.mGet('/', h)
+homeRoute.mGet('/:id', hhh)
 
 homeRoute.mPost('/mazi', hh)
 

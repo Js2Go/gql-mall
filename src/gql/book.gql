@@ -1,0 +1,15 @@
+type Book {
+  title: String
+  author: Author
+}
+
+# interface Book {
+#   title: String!
+#   author: Author!
+# }
+
+# type Textbook implements Book {
+#   title: String! # Must be present
+#   author: Author! # Must be present
+#   courses: [Course!]!
+# }

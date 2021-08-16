@@ -1,0 +1,11 @@
+type Author {
+  name: String
+  books: [Book]
+}
+
+type AuthorMutationResponse implements MutationResponse {
+  code: String!
+  success: Boolean!
+  message: String!
+  author: Author
+}
