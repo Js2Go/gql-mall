@@ -1,4 +1,0 @@
-type Movie {
-  name: String
-  author: Author
-}
