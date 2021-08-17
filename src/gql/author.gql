@@ -1,11 +1,13 @@
-type Author {
+# import Book2 from "book.graphql"
+# import MutationResponse from "res.graphql"
+type Author2 {
   name: String
-  books: [Book]
+  books: [Book2]
 }
 
 type AuthorMutationResponse implements MutationResponse {
   code: String!
   success: Boolean!
   message: String!
-  author: Author
+  author: Author2
 }

@@ -1,6 +1,8 @@
-type Book {
+# import Author2 from "author.graphql"
+
+type Book2 {
   title: String
-  author: Author
+  author: Author2
 }
 
 # interface Book {

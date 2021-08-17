@@ -1,4 +1,39 @@
-type Query {
-  allMedia: [Media]
-  books: [Book!] # Can include Textbook objects
+type Book {
+  title: String
+  publishData: Date
+  author: String
+  oldTitle: String
 }
+
+scalar Date
+
+scalar Odd
+
+scalar Upload
+
+type File {
+  filename: String!
+  mimetype: String!
+  encoding: String!
+}
+
+type Movie {
+  name: String
+  author: String
+}
+
+# The "Query" type is special: it lists all of the available queries that
+# clients can execute, along with the return type for each. In this
+# case, the "books" query returns an array of zero or more Books (defined above).
+type Query {
+  books: [Book]
+  echoOdd(odd: Odd!): Odd!
+  # movie(id: Int!): Movie
+  # mostViewedMovies: [Movie]
+  otherFields: Boolean!
+}
+
+type Mutation {
+  singleUpload(file: Upload!): File!
+}
+

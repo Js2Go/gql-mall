@@ -1,1 +1,4 @@
-union Media = Book | Movie
+# import Book2 from "book.graphql"
+# import Movie2 from "movie.graphql"
+
+union Media = Book2 | Movie2
