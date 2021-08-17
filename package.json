@@ -8,6 +8,8 @@
     "test": "jest"
   },
   "dependencies": {
+    "@graphql-tools/graphql-file-loader": "^7.0.4",
+    "@graphql-tools/load": "^7.1.6",
     "@graphql-tools/schema": "^8.1.0",
     "@graphql-tools/utils": "^8.1.0",
     "@koa/router": "^10.1.0",
