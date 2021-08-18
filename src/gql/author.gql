@@ -1,5 +1,5 @@
-# import Book2 from "book.graphql"
-# import MutationResponse from "res.graphql"
+# import Book2 from "book.gql"
+# import MutationResponse from "res.gql"
 type Author2 {
   name: String
   books: [Book2]

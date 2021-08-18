@@ -1,4 +1,4 @@
-# import Author2 from "author.graphql"
+# import Author2 from "author.gql"
 
 type Book2 {
   title: String
