@@ -1,39 +1,91 @@
-type Book {
-  title: String
-  publishData: Date
-  author: String
-  oldTitle: String
-}
-
 scalar Date
 
-scalar Odd
+directive @upper on FIELD_DEFINITION
 
-scalar Upload
+directive @rest(url: String) on FIELD_DEFINITION
 
-type File {
-  filename: String!
-  mimetype: String!
-  encoding: String!
-}
-
-type Movie {
-  name: String
-  author: String
-}
-
-# The "Query" type is special: it lists all of the available queries that
-# clients can execute, along with the return type for each. In this
-# case, the "books" query returns an array of zero or more Books (defined above).
 type Query {
-  books: [Book]
-  echoOdd(odd: Odd!): Odd!
-  # movie(id: Int!): Movie
-  # mostViewedMovies: [Movie]
-  otherFields: Boolean!
+  me: User
+  hero(name: String): Hero
+  episode: Episode
+  search: [SearchResult!]!
+  characters: Character
+  books: [Book!]!
+  date: Date
+  getDate(d: Date!): Date!
+  hello: String @upper
+  people: String @rest(url: "/api/v1/people")
 }
 
 type Mutation {
-  singleUpload(file: Upload!): File!
+  create(ri: ReviewInput): View
 }
 
+type Author {
+  name: String!
+}
+
+type Course {
+  name: String!
+}
+
+interface Book {
+  title: String!
+  author: Author!
+}
+
+type Textbook implements Book {
+  title: String!
+  author: Author!
+  courses: [Course!]!
+}
+
+type ColoringBook implements Book {
+  title: String!
+  author: Author!
+  colors: [String!]!
+}
+
+type User {
+  id: ID
+  name: String @deprecated(reason: "不用了")
+}
+
+type Hero {
+  name: String
+  friends: [Hero]
+}
+
+enum Episode {
+  NEWHOPE
+  EMPIRE
+  JEDI
+}
+
+interface Character {
+  id: ID!
+  name: String!
+}
+
+type Human implements Character {
+  id: ID!
+  name: String!
+  totalCredits: Int
+}
+ 
+type Droid implements Character {
+  id: ID!
+  name: String!
+  primaryFunction: String
+}
+
+union SearchResult = Human | Droid
+
+input ReviewInput {
+  stars: Int!
+  commentary: String
+}
+
+type View {
+  stars: Int
+}

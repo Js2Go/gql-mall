@@ -1,24 +1,22 @@
 import { join } from 'path'
 
 import Koa from 'koa'
-import { ApolloServer, AuthenticationError, UserInputError } from 'apollo-server-koa'
+import { ApolloServer } from 'apollo-server-koa'
 import { GraphQLScalarType, GraphQLSchema, Kind } from 'graphql'
 import { IResolvers } from '@graphql-tools/utils'
-import { BaseRedisCache } from 'apollo-server-cache-redis'
-import Redis from 'ioredis'
-import { GraphQLUpload, graphqlUploadKoa } from 'graphql-upload'
-import promises from 'stream/promises'
+import { graphqlUploadKoa } from 'graphql-upload'
 import { loadSchema } from '@graphql-tools/load'
 import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader'
-
-import MoviesAPI from './datasource/movies'
-import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core/dist/plugin/landingPage/graphqlPlayground'
 import { addResolversToSchema } from '@graphql-tools/schema'
+import {
+  ApolloServerPluginLandingPageGraphQLPlayground
+} from 'apollo-server-core/dist/plugin/landingPage/graphqlPlayground'
 
-// import upperDirective from './directive/upperDirective'
 
-// const { upperDirectiveTypeDefs, upperDirectiveTransformer } = upperDirective('upper')
-// const { upperDirectiveTypeDefs: upperCaseDirectiveTypeDefs, upperDirectiveTransformer: upperCaseDirectiveTransformer } = upperDirective('upperCase')
+import upperDirective from './directive/upperDirective'
+import restDirective from './directive/restDirective'
+const upper = upperDirective('upper')
+
 
 const PORT = 8899
 
@@ -28,36 +26,85 @@ const getTypeDefs = async () => {
   })
 }
 
-function oddValue(value: number) {
-  if (typeof value === 'number' && Number.isInteger(value) && value % 2 !== 0) {
-    return value
-  }
-  throw new UserInputError(`Provided value is not an odd integer`)
+const user = {
+  id: 1,
+  name: 'mazi'
 }
+
+const hero = {
+  name: 'mazi',
+  friends: [
+    {
+      name: 'haozi',
+      friends: []
+    },
+    {
+      name: 'kaizi',
+      friends: []
+    },
+    {
+      name: 'wangzi',
+      friends: []
+    },
+    {
+      name: 'dengzi',
+      friends: []
+    },
+  ]
+}
+
+const searchRes = [
+  {
+    id: 1,
+    name: 'mazi',
+    totalCredits: 1
+  },
+  {
+    id: 1111,
+    name: 'mazi1111',
+    primaryFunction: "1111"
+  },
+]
 
 const books = [
   {
-    title: 'The Awakening',
-    publishData: new Date(),
-    author: 'Kate Chopin',
+    title: 'title1',
+    author: {
+      name: 'authorname1'
+    },
+    courses: [
+      {
+        name: 'coursesname1'
+      },
+      {
+        name: 'coursesname2'
+      },
+    ]
   },
   {
-    title: 'City of Glass',
-    publishData: new Date(),
-    author: 'Paul Auster',
+    title: 'title2',
+    author: {
+      name: 'authorname2'
+    },
+    colors: ['colors1', 'colors2']
   },
 ]
 
 const dateScalar = new GraphQLScalarType({
   name: 'Date',
-  description: 'This is the Date type',
-  serialize(value: Date) {
-    return value.getTime()
+  // Serializes an internal value to include in a response.
+  serialize(val: Date) {
+    console.log('s', val)
+    return val.getTime()
   },
-  parseValue(value) {
-    return new Date(value)
+  // Parses an externally provided value to use as an input.
+  parseValue(val) {
+    console.log('p', val)
+    return new Date(val)
   },
+  // Parses an externally provided literal value to use as an input.
   parseLiteral(ast) {
+    console.log('pl', (ast as any).value)
     if (ast.kind === Kind.INT) {
       return new Date(parseInt(ast.value, 10))
     }
@@ -65,45 +112,87 @@ const dateScalar = new GraphQLScalarType({
   }
 })
 
-const oddScalar = new GraphQLScalarType({
-  name: 'Odd',
-  description: 'Odd custom scalar type',
-  parseValue: oddValue,
-  serialize: oddValue,
-  parseLiteral(ast) {
-    if (ast.kind === Kind.INT) {
-      return oddValue(parseInt(ast.value, 10))
-    }
-    throw new UserInputError(`Provided value is not an odd integer`)
-  }
-})
-
 const resolvers: IResolvers = {
   Date: dateScalar,
-  Odd: oddScalar,
-  Upload: GraphQLUpload,
-  Query: {
-    books: () => books,
-    echoOdd(parent, args, context, info) {
-      return args.odd
+  Character: {
+    __resolveType(obj: any, context: any, info: any) {
+      if (obj.totalCredits) {
+        return 'Human'
+      }
+      if (obj.primaryFunction) {
+        return 'Droid'
+      }
+      return null
+    }
+  },
+  SearchResult: {
+    __resolveType(obj: any, context: any, info: any) {
+      if (obj.totalCredits) {
+        return 'Human'
+      }
+      if (obj.primaryFunction) {
+        return 'Droid'
+      }
+      return null
+    }
+  },
+  Book: {
+    __resolveType(book: any, context: any, info: any){
+      // Only Textbook has a courses field
+      if(book.courses){
+        return 'Textbook';
+      }
+      // Only ColoringBook has a colors field
+      if(book.colors){
+        return 'ColoringBook';
+      }
+      return null; // GraphQLError is thrown
     },
-    // movie: async (_, { id }, { dataSources }) => {
-    //   console.log(dataSources)
-    //   return dataSources.moviesAPI.getMovie(id)
-    // },
-    // mostViewedMovies: async (_, __, { dataSources }) => {
-    //   return dataSources.moviesAPI.getMostViewedMovies()
-    // },
+  },
+  Query: {
+    me(parent, args, context, info) {
+      return user
+    },
+    hero(parent, args, context, info) {
+      if (args.name && ~hero.friends.findIndex(f => f.name === args.name)) {
+        return { ...hero, friends: [hero.friends.find(f => f.name === args.name)] }
+      }
+      return hero
+    },
+    episode(parent, args, context, info) {
+      if (args.name && ~hero.friends.findIndex(f => f.name === args.name)) {
+        return { ...hero, friends: [hero.friends.find(f => f.name === args.name)] }
+      }
+      return hero
+    },
+    search(parent, args, context, info) {
+      return searchRes
+    },
+    books(parent, args, context, info) {
+      return books
+    },
+    characters(parent, args, context, info) {
+      return searchRes
+    },
+    date(parent, args, context, info) {
+      return new Date()
+    },
+    getDate(parent, args, context, info) {
+      return args.d
+    },
+    hello(parent, args, context, info) {
+      return 'hello'
+    },
+    people(parent, args, context, info) {
+      return 'hello'
+    },
   },
   Mutation: {
-    singleUpload: async (parent, { file }) => {
-      const { createReadStream, filename, mimetype, encoding } = await file
-      const stream = createReadStream()
-      const out = (await import('fs')).createWriteStream(filename)
-      stream.pipe(out)
-      await promises.finished(out)
-
-      return { filename, mimetype, encoding }
+    create(parent, args, context, info) {
+      console.log(args)
+      return {
+        stars: ++args.ri.stars
+      }
     }
   }
 }
@@ -113,7 +202,6 @@ interface ServerApp {
   app: Koa
 }
 
-
 async function startApolloServer(schema: GraphQLSchema, resolvers: IResolvers, port: number): Promise<ServerApp> {
   const schemaWithResolvers = addResolversToSchema({
     schema,
@@ -121,28 +209,9 @@ async function startApolloServer(schema: GraphQLSchema, resolvers: IResolvers, p
   })
   const server = new ApolloServer({
     schema: schemaWithResolvers,
-    cache: new BaseRedisCache({
-      client: new Redis({
-        host: '127.0.0.1',
-        port: 6379,
-        db: 2
-      })
-    }),
-    formatError(err) {
-      if (err.originalError instanceof AuthenticationError) {
-        return new Error('Different authentication error message!')
-      }
-      return err
-    },
     plugins: [
       ApolloServerPluginLandingPageGraphQLPlayground({})
     ],
-    // ts-node has a bug need to fix, so I can't use dataSources option
-    // dataSources: () => {
-    //   return {
-    //     moviesAPI: new MoviesAPI(),
-    //   }
-    // },
   })
   await server.start()
   const app = new Koa()
@@ -170,5 +239,5 @@ async function startApolloServer(schema: GraphQLSchema, resolvers: IResolvers, p
 }
 
 getTypeDefs().then(schema => {
-  startApolloServer(schema, resolvers, PORT)
+  startApolloServer(upper(restDirective('').restDirectiveTransformer(schema)), resolvers, PORT)
 })
