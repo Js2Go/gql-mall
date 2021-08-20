@@ -14,6 +14,8 @@ import {
 } from 'apollo-server-core/dist/plugin/landingPage/graphqlPlayground'
 import { SubscriptionServer } from 'subscriptions-transport-ws'
 import { PubSub } from 'graphql-subscriptions'
+import ws from 'ws'
+import { useServer } from 'graphql-ws/lib/use/ws'
 
 import upperDirective from './directive/upperDirective'
 import restDirective from './directive/restDirective'
@@ -241,14 +243,22 @@ async function startApolloServer(schema: GraphQLSchema, port: number): Promise<S
 
   const httpServer = createServer(app.callback())
 
-  SubscriptionServer.create(
-    { schema, execute, subscribe },
-    { server: httpServer, path: server.graphqlPath }
-  )
+  // SubscriptionServer.create(
+  //   { schema, execute, subscribe },
+  //   { server: httpServer, path: server.graphqlPath }
+  // )
 
   new Promise((resolve: (val: void) => void) => {
     const start = (p: number) => {
-      const s = httpServer.listen({ port: p }, resolve)
+      const s = httpServer.listen({ port: p }, () => {
+        const wsServer = new ws.Server({
+          server: s,
+          path: '/graphql',
+        })
+
+        useServer({ schema }, wsServer)
+        resolve()
+      })
       s.on('error', err => {
         if (~err.message.indexOf('EADDRINUSE')) {
           p++
