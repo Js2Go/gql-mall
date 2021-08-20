@@ -15,6 +15,13 @@ type Query {
   getDate(d: Date!): Date!
   hello: String @upper
   people: String @rest(url: "http://localhost:2021/movies/")
+  movie(id: Int): Movie!
+  mostViewedMovies: [Movie!]!
+}
+
+type Movie {
+  message: String
+  name: String
 }
 
 type Mutation {

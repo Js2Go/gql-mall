@@ -183,11 +183,16 @@ const resolvers: IResolvers = {
       return args.d
     },
     async hello(parent, args, context, info) {
-      const data = await context.dataSources.movies.getMovie(1)
-      return data.name
-    },
-    people(parent, args, context, info) {
       return 'hello'
+    },
+    async people(parent, args, context, info) {
+      return 'people'
+    },
+    movie: async (_, { id }, { dataSources }) => {
+      return dataSources.movies.getMovie(id)
+    },
+    mostViewedMovies: async (_, __, { dataSources }) => {
+      return dataSources.movies.getMostViewedMovies()
     },
   },
   Mutation: {
