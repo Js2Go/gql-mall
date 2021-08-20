@@ -981,6 +981,14 @@
   resolved "https://registry.nlark.com/@types/mime/download/@types/mime-1.3.2.tgz#93e25bf9ee75fe0fd80b594bc4feb0e862111b5a"
   integrity sha1-k+Jb+e51/g/YC1lLxP6w6GIRG1o=
 
+"@types/node-fetch@^2.5.12":
+  version "2.5.12"
+  resolved "https://registry.nlark.com/@types/node-fetch/download/@types/node-fetch-2.5.12.tgz#8a6f779b1d4e60b7a57fb6fd48d84fb545b9cc66"
+  integrity sha1-im93mx1OYLelf7b9SNhPtUW5zGY=
+  dependencies:
+    "@types/node" "*"
+    form-data "^3.0.0"
+
 "@types/node@*", "@types/node@^16.6.1":
   version "16.6.1"
   resolved "https://registry.nlark.com/@types/node/download/@types/node-16.6.1.tgz?cache=0&sync_timestamp=1628800447602&other_urls=https%3A%2F%2Fregistry.nlark.com%2F%40types%2Fnode%2Fdownload%2F%40types%2Fnode-16.6.1.tgz#aee62c7b966f55fc66c7b6dfa1d58db2a616da61"

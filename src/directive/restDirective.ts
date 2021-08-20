@@ -1,5 +1,6 @@
 import { getDirective, MapperKind, mapSchema } from '@graphql-tools/utils'
 import { GraphQLSchema } from 'graphql'
+import fetch from 'node-fetch'
 
 function restDirective(directiveName: string) {
   return {
@@ -8,7 +9,11 @@ function restDirective(directiveName: string) {
         const restDirective = getDirective(schema, fieldConfig, directiveName)?.[0]
         if (restDirective) {
           const { url } = restDirective
-          fieldConfig.resolve = () => fetch(url)
+          fieldConfig.resolve = async () => {
+            const data = await fetch(url)
+            const d = await data.json()
+            return d[0].name
+          }
           return fieldConfig
         }
       }

@@ -14,7 +14,7 @@ type Query {
   date: Date
   getDate(d: Date!): Date!
   hello: String @upper
-  people: String @rest(url: "/api/v1/people")
+  people: String @rest(url: "http://localhost:2021/movies/")
 }
 
 type Mutation {

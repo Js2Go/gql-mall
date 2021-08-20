@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "start": "nodemon --exec \"ts-node\" src/server.ts",
-    "start-rest": "nodemon --exec \"ts-node\" src/server-rest.ts",
+    "start:rest": "nodemon --exec \"ts-node\" src/server-rest.ts",
     "test": "jest"
   },
   "dependencies": {
@@ -13,6 +13,7 @@
     "@graphql-tools/schema": "^8.1.0",
     "@graphql-tools/utils": "^8.1.0",
     "@koa/router": "^10.1.0",
+    "@types/node-fetch": "^2.5.12",
     "apollo-datasource-rest": "^3.1.1",
     "apollo-server-cache-redis": "^3.0.3",
     "apollo-server-core": "^3.1.2",
@@ -22,6 +23,7 @@
     "ioredis": "^4.27.7",
     "koa": "^2.13.1",
     "log4js": "^6.3.0",
+    "node-fetch": "^2.6.1",
     "subscriptions-transport-ws": "^0.9.19",
     "ts-node": "^10.2.0"
   },

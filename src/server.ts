@@ -7,7 +7,7 @@ import { IResolvers } from '@graphql-tools/utils'
 import { graphqlUploadKoa } from 'graphql-upload'
 import { loadSchema } from '@graphql-tools/load'
 import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader'
-import { addResolversToSchema } from '@graphql-tools/schema'
+import { addResolversToSchema, makeExecutableSchema } from '@graphql-tools/schema'
 import {
   ApolloServerPluginLandingPageGraphQLPlayground
 } from 'apollo-server-core/dist/plugin/landingPage/graphqlPlayground'
@@ -16,13 +16,14 @@ import {
 import upperDirective from './directive/upperDirective'
 import restDirective from './directive/restDirective'
 const upper = upperDirective('upper')
+const { restDirectiveTransformer } = restDirective('rest')
 
 
 const PORT = 8899
 
 const getTypeDefs = async () => {
   return await loadSchema(join(__dirname, 'gql/*.gql'), {
-    loaders: [new GraphQLFileLoader()]
+    loaders: [new GraphQLFileLoader()],
   })
 }
 
@@ -203,12 +204,8 @@ interface ServerApp {
 }
 
 async function startApolloServer(schema: GraphQLSchema, resolvers: IResolvers, port: number): Promise<ServerApp> {
-  const schemaWithResolvers = addResolversToSchema({
-    schema,
-    resolvers
-  })
   const server = new ApolloServer({
-    schema: schemaWithResolvers,
+    schema,
     plugins: [
       ApolloServerPluginLandingPageGraphQLPlayground({})
     ],
@@ -239,5 +236,12 @@ async function startApolloServer(schema: GraphQLSchema, resolvers: IResolvers, p
 }
 
 getTypeDefs().then(schema => {
-  startApolloServer(upper(restDirective('').restDirectiveTransformer(schema)), resolvers, PORT)
+  schema = addResolversToSchema({
+    schema,
+    resolvers
+  })
+  schema = restDirectiveTransformer(upper(makeExecutableSchema({
+    typeDefs: schema,
+  })))
+  startApolloServer(schema, resolvers, PORT)
 })
