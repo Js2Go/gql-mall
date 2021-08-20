@@ -1,8 +1,9 @@
 import { join } from 'path'
+import { createServer } from 'http'
 
 import Koa from 'koa'
 import { ApolloServer } from 'apollo-server-koa'
-import { GraphQLScalarType, GraphQLSchema, Kind } from 'graphql'
+import { GraphQLScalarType, GraphQLSchema, Kind, execute, subscribe } from 'graphql'
 import { IResolvers } from '@graphql-tools/utils'
 import { graphqlUploadKoa } from 'graphql-upload'
 import { loadSchema } from '@graphql-tools/load'
@@ -11,6 +12,8 @@ import { addResolversToSchema, makeExecutableSchema } from '@graphql-tools/schem
 import {
   ApolloServerPluginLandingPageGraphQLPlayground
 } from 'apollo-server-core/dist/plugin/landingPage/graphqlPlayground'
+import { SubscriptionServer } from 'subscriptions-transport-ws'
+import { PubSub } from 'graphql-subscriptions'
 
 import upperDirective from './directive/upperDirective'
 import restDirective from './directive/restDirective'
@@ -19,6 +22,8 @@ import MoviesAPI from './datasource/movies'
 
 const upper = upperDirective('upper')
 const { restDirectiveTransformer } = restDirective('rest')
+
+const pubsub = new PubSub()
 
 const PORT = 8899
 
@@ -201,6 +206,15 @@ const resolvers: IResolvers = {
       return {
         stars: ++args.ri.stars
       }
+    },
+    createPost(parent, args, context) {
+      pubsub.publish('POST_CREATED', { postCreated: args })
+      return args
+    },
+  },
+  Subscription: {
+    postCreated: {
+      subscribe: () => pubsub.asyncIterator(['POST_CREATED'])
     }
   }
 }
@@ -224,9 +238,17 @@ async function startApolloServer(schema: GraphQLSchema, port: number): Promise<S
   const app = new Koa()
   app.use(graphqlUploadKoa())
   server.applyMiddleware({ app, cors: true, bodyParserConfig: true })
-  await new Promise((resolve: (val: void) => void) => {
+
+  const httpServer = createServer(app.callback())
+
+  SubscriptionServer.create(
+    { schema, execute, subscribe },
+    { server: httpServer, path: server.graphqlPath }
+  )
+
+  new Promise((resolve: (val: void) => void) => {
     const start = (p: number) => {
-      const s = app.listen({ port: p }, resolve)
+      const s = httpServer.listen({ port: p }, resolve)
       s.on('error', err => {
         if (~err.message.indexOf('EADDRINUSE')) {
           p++
@@ -242,6 +264,25 @@ async function startApolloServer(schema: GraphQLSchema, port: number): Promise<S
 
     start(port)
   })
+
+  // new Promise((resolve: (val: void) => void) => {
+  //   const start = (p: number) => {
+  //     const s = app.listen({ port: p }, resolve)
+  //     s.on('error', err => {
+  //       if (~err.message.indexOf('EADDRINUSE')) {
+  //         p++
+  //         // console.log(`server port ${port} is used, now using port ${p}`)
+  //         start(p)
+  //       }
+  //     })
+
+  //     s.on('listening', () => {
+  //       console.log(`🚀 Server ready at http://localhost:${p}${server.graphqlPath}`)
+  //     })
+  //   }
+
+  //   start(port)
+  // })
   return { server, app }
 }
 

@@ -19,13 +19,23 @@ type Query {
   mostViewedMovies: [Movie!]!
 }
 
+type Mutation {
+  create(ri: ReviewInput): View
+  createPost(author: String, comment: String): Post
+}
+
+type Subscription {
+  postCreated: Post
+}
+
+type Post {
+  author: String
+  comment: String
+}
+
 type Movie {
   message: String
   name: String
-}
-
-type Mutation {
-  create(ri: ReviewInput): View
 }
 
 type Author {
