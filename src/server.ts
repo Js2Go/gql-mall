@@ -12,12 +12,13 @@ import {
   ApolloServerPluginLandingPageGraphQLPlayground
 } from 'apollo-server-core/dist/plugin/landingPage/graphqlPlayground'
 
-
 import upperDirective from './directive/upperDirective'
 import restDirective from './directive/restDirective'
+
+import MoviesAPI from './datasource/movies'
+
 const upper = upperDirective('upper')
 const { restDirectiveTransformer } = restDirective('rest')
-
 
 const PORT = 8899
 
@@ -181,8 +182,9 @@ const resolvers: IResolvers = {
     getDate(parent, args, context, info) {
       return args.d
     },
-    hello(parent, args, context, info) {
-      return 'hello'
+    async hello(parent, args, context, info) {
+      const data = await context.dataSources.movies.getMovie(1)
+      return data.name
     },
     people(parent, args, context, info) {
       return 'hello'
@@ -203,12 +205,15 @@ interface ServerApp {
   app: Koa
 }
 
-async function startApolloServer(schema: GraphQLSchema, resolvers: IResolvers, port: number): Promise<ServerApp> {
+async function startApolloServer(schema: GraphQLSchema, port: number): Promise<ServerApp> {
   const server = new ApolloServer({
     schema,
     plugins: [
       ApolloServerPluginLandingPageGraphQLPlayground({})
     ],
+    dataSources: () => ({
+      movies: new MoviesAPI()
+    })
   })
   await server.start()
   const app = new Koa()
@@ -243,5 +248,5 @@ getTypeDefs().then(schema => {
   schema = restDirectiveTransformer(upper(makeExecutableSchema({
     typeDefs: schema,
   })))
-  startApolloServer(schema, resolvers, PORT)
+  startApolloServer(schema, PORT)
 })

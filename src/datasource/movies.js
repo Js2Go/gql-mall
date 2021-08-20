@@ -1,7 +1,4 @@
-// this is a bug
-// but I can't fix it
-
-import { RequestOptions, RESTDataSource } from 'apollo-datasource-rest'
+const { RESTDataSource } = require('apollo-datasource-rest')
 
 class MoviesAPI extends RESTDataSource {
   constructor() {
@@ -9,11 +6,11 @@ class MoviesAPI extends RESTDataSource {
     this.baseURL = 'http://localhost:2021/'
   }
 
-  willSendRequest(req: RequestOptions) {
+  willSendRequest(req) {
     req.headers.set('Authorization', this.context.token)
   }
 
-  async getMovie(id: string) {
+  async getMovie(id) {
     return this.get(`movies/${id}`)
   }
 
@@ -26,4 +23,4 @@ class MoviesAPI extends RESTDataSource {
   }
 }
 
-export default MoviesAPI
+module.exports = MoviesAPI
