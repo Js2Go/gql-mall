@@ -1,4 +1,0 @@
-# import Book2 from "book.gql"
-# import Movie2 from "movie.gql"
-
-union Media = Book2 | Movie2

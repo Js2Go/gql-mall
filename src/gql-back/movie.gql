@@ -1,6 +1,0 @@
-# import Author2 from "author.gql"
-
-type Movie2 {
-  name: String
-  author: Author2
-}

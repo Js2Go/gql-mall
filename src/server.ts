@@ -1,19 +1,19 @@
 import { join } from 'path'
 import { createServer } from 'http'
+import promises from 'stream/promises'
 
 import Koa from 'koa'
-import { ApolloServer } from 'apollo-server-koa'
+import { ApolloServer, AuthenticationError } from 'apollo-server-koa'
 import { GraphQLScalarType, GraphQLSchema, Kind, execute, subscribe } from 'graphql'
 import { IResolvers } from '@graphql-tools/utils'
-import { graphqlUploadKoa } from 'graphql-upload'
+import { GraphQLUpload, graphqlUploadKoa } from 'graphql-upload'
 import { loadSchema } from '@graphql-tools/load'
 import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader'
 import { addResolversToSchema, makeExecutableSchema } from '@graphql-tools/schema'
-import {
-  ApolloServerPluginLandingPageGraphQLPlayground
-} from 'apollo-server-core/dist/plugin/landingPage/graphqlPlayground'
 import { SubscriptionServer } from 'subscriptions-transport-ws'
 import { PubSub } from 'graphql-subscriptions'
+import { BaseRedisCache } from 'apollo-server-cache-redis'
+import Redis from 'ioredis'
 
 import upperDirective from './directive/upperDirective'
 import restDirective from './directive/restDirective'
@@ -101,17 +101,14 @@ const dateScalar = new GraphQLScalarType({
   name: 'Date',
   // Serializes an internal value to include in a response.
   serialize(val: Date) {
-    console.log('s', val)
     return val.getTime()
   },
   // Parses an externally provided value to use as an input.
   parseValue(val) {
-    console.log('p', val)
     return new Date(val)
   },
   // Parses an externally provided literal value to use as an input.
   parseLiteral(ast) {
-    console.log('pl', (ast as any).value)
     if (ast.kind === Kind.INT) {
       return new Date(parseInt(ast.value, 10))
     }
@@ -121,6 +118,7 @@ const dateScalar = new GraphQLScalarType({
 
 const resolvers: IResolvers = {
   Date: dateScalar,
+  Upload: GraphQLUpload,
   Character: {
     __resolveType(obj: any, context: any, info: any) {
       if (obj.totalCredits) {
@@ -202,7 +200,6 @@ const resolvers: IResolvers = {
   },
   Mutation: {
     create(parent, args, context, info) {
-      console.log(args)
       return {
         stars: ++args.ri.stars
       }
@@ -211,6 +208,15 @@ const resolvers: IResolvers = {
       pubsub.publish('POST_CREATED', { postCreated: args })
       return args
     },
+    singleUpload: async (parent, { file }) => {
+      const { createReadStream, filename, mimetype, encoding } = await file
+      const stream = createReadStream()
+      const out = (await import('fs')).createWriteStream(filename)
+      stream.pipe(out)
+      await promises.finished(out)
+
+      return { filename, mimetype, encoding }
+    }
   },
   Subscription: {
     postCreated: {
@@ -227,12 +233,22 @@ interface ServerApp {
 async function startApolloServer(schema: GraphQLSchema, port: number): Promise<ServerApp> {
   const server = new ApolloServer({
     schema,
-    plugins: [
-      ApolloServerPluginLandingPageGraphQLPlayground({})
-    ],
     dataSources: () => ({
       movies: new MoviesAPI()
-    })
+    }),
+    cache: new BaseRedisCache({
+      client: new Redis({
+        host: '127.0.0.1',
+        port: 6379,
+        db: 2
+      })
+    }),
+    formatError(err) {
+      if (err.originalError instanceof AuthenticationError) {
+        return new Error('Different authentication error message!')
+      }
+      return err
+    },
   })
   await server.start()
   const app = new Koa()
@@ -252,7 +268,6 @@ async function startApolloServer(schema: GraphQLSchema, port: number): Promise<S
       s.on('error', err => {
         if (~err.message.indexOf('EADDRINUSE')) {
           p++
-          // console.log(`server port ${port} is used, now using port ${p}`)
           start(p)
         }
       })
@@ -264,25 +279,6 @@ async function startApolloServer(schema: GraphQLSchema, port: number): Promise<S
 
     start(port)
   })
-
-  // new Promise((resolve: (val: void) => void) => {
-  //   const start = (p: number) => {
-  //     const s = app.listen({ port: p }, resolve)
-  //     s.on('error', err => {
-  //       if (~err.message.indexOf('EADDRINUSE')) {
-  //         p++
-  //         // console.log(`server port ${port} is used, now using port ${p}`)
-  //         start(p)
-  //       }
-  //     })
-
-  //     s.on('listening', () => {
-  //       console.log(`🚀 Server ready at http://localhost:${p}${server.graphqlPath}`)
-  //     })
-  //   }
-
-  //   start(port)
-  // })
   return { server, app }
 }
 

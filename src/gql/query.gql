@@ -1,11 +1,24 @@
 scalar Date
 
+scalar Upload
+
 directive @upper on FIELD_DEFINITION
 
 directive @rest(url: String) on FIELD_DEFINITION
 
+enum CacheControlScope {
+  PUBLIC
+  PRIVATE
+}
+
+directive @cacheControl(
+  maxAge: Int
+  scope: CacheControlScope
+  inheritMaxAge: Boolean
+) on FIELD_DEFINITION | OBJECT | INTERFACE | UNION
+
 type Query {
-  me: User
+  me: User @cacheControl(maxAge: 5)
   hero(name: String): Hero
   episode: Episode
   search: [SearchResult!]!
@@ -14,18 +27,25 @@ type Query {
   date: Date
   getDate(d: Date!): Date!
   hello: String @upper
-  people: String @rest(url: "http://localhost:2021/movies/")
-  movie(id: Int): Movie!
+  people: String @rest(url: "http://localhost:2021/movies/") @cacheControl(maxAge: 180)
+  movie(id: Int): Movie! @cacheControl(maxAge: 180)
   mostViewedMovies: [Movie!]!
 }
 
 type Mutation {
   create(ri: ReviewInput): View
   createPost(author: String, comment: String): Post
+  singleUpload(file: Upload!): File!
 }
 
 type Subscription {
   postCreated: Post
+}
+
+type File {
+  filename: String!
+  mimetype: String!
+  encoding: String!
 }
 
 type Post {
