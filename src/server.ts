@@ -274,7 +274,17 @@ async function startApolloServer(schema: GraphQLSchema, port: number): Promise<S
   const httpServer = createServer(app.callback())
 
   SubscriptionServer.create(
-    { schema, execute, subscribe },
+    {
+      schema,
+      execute,
+      subscribe,
+      onConnect(connectionParams: any, webscoket: any) {
+        if (connectionParams.authorization) {
+          return '牛逼'
+        }
+        throw new Error('Missing auth token!')
+      }
+    },
     { server: httpServer, path: server.graphqlPath }
   )
 
