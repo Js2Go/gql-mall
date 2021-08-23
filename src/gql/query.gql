@@ -33,6 +33,7 @@ type Query {
 }
 
 type Mutation {
+  login(user: UserInput): LoginedUserInfo
   create(ri: ReviewInput): View
   createPost(author: String, comment: String): Post
   singleUpload(file: Upload!): File!
@@ -40,6 +41,16 @@ type Mutation {
 
 type Subscription {
   postCreated: Post
+}
+
+input UserInput {
+  username: String
+  password: String
+}
+
+type LoginedUserInfo {
+  username: String
+  token: String
 }
 
 type File {

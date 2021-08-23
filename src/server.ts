@@ -21,7 +21,7 @@ import restDirective from './directive/restDirective'
 import MoviesAPI from './datasource/movies'
 
 const upper = upperDirective('upper')
-const { restDirectiveTransformer } = restDirective('rest')
+const rest = restDirective('rest')
 
 const pubsub = new PubSub()
 
@@ -96,6 +96,11 @@ const books = [
     colors: ['colors1', 'colors2']
   },
 ]
+
+interface UserInput {
+  username: string
+  password: string
+}
 
 const dateScalar = new GraphQLScalarType({
   name: 'Date',
@@ -208,7 +213,7 @@ const resolvers: IResolvers = {
       pubsub.publish('POST_CREATED', { postCreated: args })
       return args
     },
-    singleUpload: async (parent, { file }) => {
+    async singleUpload(parent, { file }) {
       const { createReadStream, filename, mimetype, encoding } = await file
       const stream = createReadStream()
       const out = (await import('fs')).createWriteStream(filename)
@@ -216,7 +221,15 @@ const resolvers: IResolvers = {
       await promises.finished(out)
 
       return { filename, mimetype, encoding }
-    }
+    },
+    login(parent, args: { user: UserInput }, context, info) {
+      if (args.user.username === 'mazi' && args.user.password === '123') {
+        return {
+          username: 'mazi',
+          token: `mazi's token can you understand`
+        }
+      }
+    },
   },
   Subscription: {
     postCreated: {
@@ -236,6 +249,9 @@ async function startApolloServer(schema: GraphQLSchema, port: number): Promise<S
     dataSources: () => ({
       movies: new MoviesAPI()
     }),
+    context: ({ ctx }) => {
+      console.log(ctx.req.headers.authorization)
+    },
     cache: new BaseRedisCache({
       client: new Redis({
         host: '127.0.0.1',
@@ -287,7 +303,7 @@ getTypeDefs().then(schema => {
     schema,
     resolvers
   })
-  schema = restDirectiveTransformer(upper(makeExecutableSchema({
+  schema = rest(upper(makeExecutableSchema({
     typeDefs: schema,
   })))
   startApolloServer(schema, PORT)
