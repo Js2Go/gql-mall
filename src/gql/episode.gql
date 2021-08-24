@@ -1,0 +1,9 @@
+type Query {
+  episode: Episode
+}
+
+enum Episode {
+  NEWHOPE
+  EMPIRE
+  JEDI
+}

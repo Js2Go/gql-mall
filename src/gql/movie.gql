@@ -1,0 +1,11 @@
+# import cacheControl from './directive.gql'
+
+type Query {
+  movie(id: Int): Movie! @cacheControl(maxAge: 180)
+  mostViewedMovies: [Movie!]!
+}
+
+type Movie {
+  message: String
+  name: String
+}

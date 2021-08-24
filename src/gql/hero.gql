@@ -1,0 +1,8 @@
+type Query {
+  hero(name: String): Hero
+}
+
+type Hero {
+  name: String
+  friends: [Hero]
+}

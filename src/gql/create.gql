@@ -1,0 +1,24 @@
+
+
+type Mutation {
+  create(ri: ReviewInput): View
+  createPost(author: String, comment: String): Post
+}
+
+type Subscription {
+  postCreated: Post
+}
+
+type Post {
+  author: String
+  comment: String
+}
+
+input ReviewInput {
+  stars: Int!
+  commentary: String
+}
+
+type View {
+  stars: Int
+}

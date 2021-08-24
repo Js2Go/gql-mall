@@ -20,6 +20,8 @@ import restDirective from './directive/restDirective'
 
 import MoviesAPI from './datasource/movies'
 
+import { user, hero, searchRes, books } from './mock'
+
 const upper = upperDirective('upper')
 const rest = restDirective('rest')
 
@@ -32,70 +34,6 @@ const getTypeDefs = async () => {
     loaders: [new GraphQLFileLoader()],
   })
 }
-
-const user = {
-  id: 1,
-  name: 'mazi'
-}
-
-const hero = {
-  name: 'mazi',
-  friends: [
-    {
-      name: 'haozi',
-      friends: []
-    },
-    {
-      name: 'kaizi',
-      friends: []
-    },
-    {
-      name: 'wangzi',
-      friends: []
-    },
-    {
-      name: 'dengzi',
-      friends: []
-    },
-  ]
-}
-
-const searchRes = [
-  {
-    id: 1,
-    name: 'mazi',
-    totalCredits: 1
-  },
-  {
-    id: 1111,
-    name: 'mazi1111',
-    primaryFunction: "1111"
-  },
-]
-
-const books = [
-  {
-    title: 'title1',
-    author: {
-      name: 'authorname1'
-    },
-    courses: [
-      {
-        name: 'coursesname1'
-      },
-      {
-        name: 'coursesname2'
-      },
-    ]
-  },
-  {
-    title: 'title2',
-    author: {
-      name: 'authorname2'
-    },
-    colors: ['colors1', 'colors2']
-  },
-]
 
 interface UserInput {
   username: string

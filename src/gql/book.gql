@@ -1,0 +1,28 @@
+type Query {
+  books: [Book!]!
+}
+
+type Author {
+  name: String!
+}
+
+type Course {
+  name: String!
+}
+
+interface Book {
+  title: String!
+  author: Author!
+}
+
+type Textbook implements Book {
+  title: String!
+  author: Author!
+  courses: [Course!]!
+}
+
+type ColoringBook implements Book {
+  title: String!
+  author: Author!
+  colors: [String!]!
+}

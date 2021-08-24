@@ -1,0 +1,5 @@
+# import upper from './directive.gql'
+
+type Query {
+  hello: String @upper
+}
