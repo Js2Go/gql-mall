@@ -1,31 +1,11 @@
-scalar Date
-
-scalar Upload
-
-directive @upper on FIELD_DEFINITION
-
-directive @rest(url: String) on FIELD_DEFINITION
-
-enum CacheControlScope {
-  PUBLIC
-  PRIVATE
-}
-
-directive @cacheControl(
-  maxAge: Int
-  scope: CacheControlScope
-  inheritMaxAge: Boolean
-) on FIELD_DEFINITION | OBJECT | INTERFACE | UNION
+# import upper, rest, cacheControl from './directive.gql'
 
 type Query {
-  me: User @cacheControl(maxAge: 5)
   hero(name: String): Hero
   episode: Episode
   search: [SearchResult!]!
   characters: Character
   books: [Book!]!
-  date: Date
-  getDate(d: Date!): Date!
   hello: String @upper
   people: String @rest(url: "http://localhost:2021/movies/") @cacheControl(maxAge: 180)
   movie(id: Int): Movie! @cacheControl(maxAge: 180)
@@ -33,30 +13,12 @@ type Query {
 }
 
 type Mutation {
-  login(user: UserInput): LoginedUserInfo
   create(ri: ReviewInput): View
   createPost(author: String, comment: String): Post
-  singleUpload(file: Upload!): File!
 }
 
 type Subscription {
   postCreated: Post
-}
-
-input UserInput {
-  username: String
-  password: String
-}
-
-type LoginedUserInfo {
-  username: String
-  token: String
-}
-
-type File {
-  filename: String!
-  mimetype: String!
-  encoding: String!
 }
 
 type Post {
@@ -92,11 +54,6 @@ type ColoringBook implements Book {
   title: String!
   author: Author!
   colors: [String!]!
-}
-
-type User {
-  id: ID
-  name: String @deprecated(reason: "不用了")
 }
 
 type Hero {

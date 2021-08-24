@@ -1,0 +1,24 @@
+# import cacheControl from './directive.gql'
+
+type Query {
+  me: User @cacheControl(maxAge: 5)
+}
+
+type Mutation {
+  login(user: UserInput): LoginedUserInfo
+}
+
+input UserInput {
+  username: String
+  password: String
+}
+
+type LoginedUserInfo {
+  username: String
+  token: String
+}
+
+type User {
+  id: ID @deprecated(reason: "不用了")
+  name: String
+}

@@ -1,0 +1,12 @@
+enum CacheControlScope {
+  PUBLIC
+  PRIVATE
+}
+
+directive @upper on FIELD_DEFINITION
+directive @rest(url: String) on FIELD_DEFINITION
+directive @cacheControl(
+  maxAge: Int
+  scope: CacheControlScope
+  inheritMaxAge: Boolean
+) on FIELD_DEFINITION | OBJECT | INTERFACE | UNION

@@ -250,7 +250,7 @@ async function startApolloServer(schema: GraphQLSchema, port: number): Promise<S
       movies: new MoviesAPI()
     }),
     context: ({ ctx }) => {
-      console.log(ctx.req.headers.authorization)
+      // console.log(ctx.req.headers.authorization)
     },
     cache: new BaseRedisCache({
       client: new Redis({
