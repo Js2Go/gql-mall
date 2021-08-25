@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "types": ["@types/jest"],
+    "types": ["@types/jest", "@types/node"],
+    "lib": ["ES2015", "DOM"],
+    "moduleResolution": "Node",
     "target": "es5",
     "module": "commonjs",
     "strict": true,

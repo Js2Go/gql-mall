@@ -1,0 +1,10 @@
+enum Episode {
+  NEWHOPE
+  EMPIRE
+  JEDI
+}
+
+enum CacheControlScope {
+  PUBLIC
+  PRIVATE
+}

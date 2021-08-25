@@ -1,7 +1,4 @@
-enum CacheControlScope {
-  PUBLIC
-  PRIVATE
-}
+# import CacheControlScope from './enum.gql'
 
 directive @upper on FIELD_DEFINITION
 directive @rest(url: String) on FIELD_DEFINITION

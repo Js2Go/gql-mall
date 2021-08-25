@@ -1,4 +1,4 @@
-scalar Date
+# import Date from './scalar.gql'
 
 type Query {
   date: Date

@@ -1,3 +1,5 @@
+# import Book from './interface.gql'
+
 type Query {
   books: [Book!]!
 }
@@ -8,11 +10,6 @@ type Author {
 
 type Course {
   name: String!
-}
-
-interface Book {
-  title: String!
-  author: Author!
 }
 
 type Textbook implements Book {

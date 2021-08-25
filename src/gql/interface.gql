@@ -1,0 +1,11 @@
+# import Author from './book.gql'
+
+interface Book {
+  title: String!
+  author: Author!
+}
+
+interface Character {
+  id: ID!
+  name: String!
+}

@@ -1,23 +1,7 @@
+# import Character from './interface.gql'
+# import SearchResult from './union.gql'
+
 type Query {
   characters: Character
   search: [SearchResult!]!
 }
-
-interface Character {
-  id: ID!
-  name: String!
-}
-
-type Human implements Character {
-  id: ID!
-  name: String!
-  totalCredits: Int
-}
- 
-type Droid implements Character {
-  id: ID!
-  name: String!
-  primaryFunction: String
-}
-
-union SearchResult = Human | Droid

@@ -1,9 +1,5 @@
+# import Episode from './enum.gql'
+
 type Query {
   episode: Episode
-}
-
-enum Episode {
-  NEWHOPE
-  EMPIRE
-  JEDI
 }

@@ -1,0 +1,15 @@
+# import Character from './interface.gql'
+
+type Human implements Character {
+  id: ID!
+  name: String!
+  totalCredits: Int
+}
+ 
+type Droid implements Character {
+  id: ID!
+  name: String!
+  primaryFunction: String
+}
+
+union SearchResult = Human | Droid
