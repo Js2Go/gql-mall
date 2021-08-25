@@ -6,7 +6,7 @@ type Query {
 
 type Mutation {
   login(user: UserInput): UserInfo
-  register(info: RegisterInput): RegisterInfo
+  register(info: RegisterInput!): RegisterInfo
 }
 
 type RegisterInfo {
@@ -14,7 +14,7 @@ type RegisterInfo {
   msg: String
 }
 
-type RegisterInput {
+input RegisterInput {
   username: String
   password: String
   code: String

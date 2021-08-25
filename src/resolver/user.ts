@@ -2,7 +2,7 @@ import { IResolvers } from '@graphql-tools/utils'
 import { Sequelize } from 'sequelize/types'
 import user from '../model/user'
 import { IUser } from '../model/user'
-import { IRegisteArg, register } from '../service/user'
+import { IRegisteArg, register as registerService } from '../service/user'
 
 interface IUserInput {
   username: string
@@ -22,9 +22,6 @@ export const userQueries: withDb = {
     const users = await u.findByPk(4)
     return users
   },
-  async register(parent, args: IRegisteArg, context, info): Promise<IRegisterInfo> {
-    return register(context.db, args)
-  },
 }
 
 export const userMutations: withDb = {
@@ -35,5 +32,8 @@ export const userMutations: withDb = {
         token: `mazi's token can you understand`
       }
     }
+  },
+  async register(parent, args: { info: IRegisteArg }, context, info): Promise<IRegisterInfo> {
+    return registerService(context.db, args.info)
   },
 }
