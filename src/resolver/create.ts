@@ -7,7 +7,7 @@ import user from '../model/user'
 export const createMutations: IResolvers = {
   async create(parent, args, context, info) {
     let u = await user(context.db)
-    await u.create({ name: 'mazi' })
+    await u.create({ username: 'mazi', password: 'asdasdsa' })
     return {
       stars: ++args.ri.stars
     }

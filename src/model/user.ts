@@ -2,7 +2,8 @@ import { Model, DataTypes, Sequelize, Optional } from 'sequelize'
 
 export interface IUser {
   id: number
-  name: string
+  username: string
+  password: string
 }
 
 interface IUserCreation extends Optional<IUser, 'id'> {}
@@ -10,7 +11,8 @@ interface IUserCreation extends Optional<IUser, 'id'> {}
 const generateUser = async (db: Sequelize) => {
   class User extends Model<IUser, IUserCreation> implements IUser {
     id!: number
-    name!: string
+    username!: string
+    password!: string
   }
   
   User.init({
@@ -19,7 +21,11 @@ const generateUser = async (db: Sequelize) => {
       autoIncrement: true,
       primaryKey: true,
     },
-    name: {
+    username: {
+      type: new DataTypes.STRING(128),
+      allowNull: false,
+    },
+    password: {
       type: new DataTypes.STRING(128),
       allowNull: false,
     },

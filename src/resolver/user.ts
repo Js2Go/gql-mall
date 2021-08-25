@@ -1,22 +1,34 @@
 import { IResolvers } from '@graphql-tools/utils'
-import { IUser } from '../model/user'
+import { Sequelize } from 'sequelize/types'
 import user from '../model/user'
+import { IUser } from '../model/user'
+import { IRegisteArg, register } from '../service/user'
 
-interface UserInput {
+interface IUserInput {
   username: string
   password: string
 }
 
-export const userQueries: IResolvers = {
+export interface IRegisterInfo {
+  code: number
+  msg: string
+}
+
+type withDb = IResolvers<any, { db: Sequelize }>
+
+export const userQueries: withDb = {
   async me(parent, args, context, info): Promise<IUser | null> {
     const u = await user(context.db)
     const users = await u.findByPk(4)
     return users
   },
+  async register(parent, args: IRegisteArg, context, info): Promise<IRegisterInfo> {
+    return register(context.db, args)
+  },
 }
 
-export const userMutations: IResolvers = {
-  login(parent, args: { user: UserInput }, context, info) {
+export const userMutations: withDb = {
+  login(parent, args: { user: IUserInput }, context, info) {
     if (args.user.username === 'mazi' && args.user.password === '123') {
       return {
         username: 'mazi',

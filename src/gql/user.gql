@@ -1,11 +1,23 @@
 # import cacheControl from './directive.gql'
 
 type Query {
-  me: User @cacheControl(maxAge: 5)
+  me: User @cacheControl(maxAge: 300)
 }
 
 type Mutation {
-  login(user: UserInput): LoginedUserInfo
+  login(user: UserInput): UserInfo
+  register(info: RegisterInput): RegisterInfo
+}
+
+type RegisterInfo {
+  code: String
+  msg: String
+}
+
+type RegisterInput {
+  username: String
+  password: String
+  code: String
 }
 
 input UserInput {
@@ -13,7 +25,7 @@ input UserInput {
   password: String
 }
 
-type LoginedUserInfo {
+type UserInfo {
   username: String
   token: String
 }
