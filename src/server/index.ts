@@ -1,4 +1,4 @@
-import { createServer } from 'http'
+import { createServer, Server } from 'http'
 import Koa from 'koa'
 import { ApolloServer } from 'apollo-server-koa'
 import { GraphQLSchema, execute, subscribe } from 'graphql'
@@ -13,15 +13,15 @@ import MoviesAPI from '../datasource/movies'
 import getSchemaWithResolvers from '../resolver'
 import withDirectivesSchema from '../util/withDirectivesSchema'
 
-interface ServerApp {
-  server: ApolloServer
+interface NormalServer {
   app: Koa
+  httpServer: Server
 }
 
 const upper = upperDirective('upper')
 const rest = restDirective('rest')
 
-async function startApolloServer(schema: GraphQLSchema, port: number): Promise<ServerApp> {
+const startApolloServer = async (schema: GraphQLSchema, port: number) => {
   const server = new ApolloServer({
     schema,
     dataSources: () => ({
@@ -45,11 +45,9 @@ async function startApolloServer(schema: GraphQLSchema, port: number): Promise<S
     // },
   })
   await server.start()
-  const app = new Koa()
-  app.use(graphqlUploadKoa())
-  server.applyMiddleware({ app, cors: true, bodyParserConfig: true })
+  const { httpServer, app } = startNormalServer(port, server.graphqlPath)
 
-  const httpServer = createServer(app.callback())
+  server.applyMiddleware({ app, cors: true, bodyParserConfig: true })
 
   SubscriptionServer.create(
     {
@@ -65,25 +63,31 @@ async function startApolloServer(schema: GraphQLSchema, port: number): Promise<S
     },
     { server: httpServer, path: server.graphqlPath }
   )
+}
 
-  new Promise((resolve: (val: void) => void) => {
-    const start = (p: number) => {
-      const s = httpServer.listen({ port: p }, resolve)
-      s.on('error', err => {
-        if (~err.message.indexOf('EADDRINUSE')) {
-          p++
-          start(p)
-        }
-      })
+const startNormalServer = (port: number, path: string): NormalServer => {
+  const app = new Koa()
+  app.use(graphqlUploadKoa())
 
-      s.on('listening', () => {
-        console.log(`🚀 Server ready at http://localhost:${p}${server.graphqlPath}`)
-      })
-    }
+  const httpServer = createServer(app.callback())
 
-    start(port)
-  })
-  return { server, app }
+  const start = (p: number) => {
+    const s = httpServer.listen({ port: p })
+    s.on('error', err => {
+      if (~err.message.indexOf('EADDRINUSE')) {
+        p++
+        start(p)
+      }
+    })
+
+    s.on('listening', () => {
+      console.log(`🚀 Server ready at http://localhost:${p}${path}`)
+    })
+  }
+
+  start(port)
+
+  return { app, httpServer }
 }
 
 export const start = async (port: number) => {

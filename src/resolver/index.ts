@@ -6,6 +6,7 @@ import getSchema from '../gql'
 import { scalarResolvers } from './scalar'
 import { interfaceResolvers } from './interface'
 import { unionResolvers } from './union'
+import { enumResolvers } from './enum'
 
 import { bookQueries } from './book'
 import { createMutations, createSubscriptions } from './create'
@@ -45,6 +46,7 @@ const resolvers: IResolvers = {
   ...scalarResolvers,
   ...interfaceResolvers,
   ...unionResolvers,
+  ...enumResolvers,
   Query,
   Mutation,
   Subscription,
