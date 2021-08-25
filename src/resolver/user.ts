@@ -1,6 +1,6 @@
 import { IResolvers } from '@graphql-tools/utils'
-
-import { user } from '../mock'
+import { IUser } from '../model/user'
+import user from '../model/user'
 
 interface UserInput {
   username: string
@@ -8,8 +8,10 @@ interface UserInput {
 }
 
 export const userQueries: IResolvers = {
-  me(parent, args, context, info) {
-    return user
+  async me(parent, args, context, info): Promise<IUser | null> {
+    const u = await user(context.db)
+    const users = await u.findByPk(4)
+    return users
   },
 }
 

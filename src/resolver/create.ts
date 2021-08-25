@@ -2,9 +2,12 @@ import { IResolvers } from '@graphql-tools/utils'
 
 import { POST_CREATED } from '../constants'
 import pubsub from '../util/pubsub'
+import user from '../model/user'
 
 export const createMutations: IResolvers = {
-  create(parent, args, context, info) {
+  async create(parent, args, context, info) {
+    let u = await user(context.db)
+    await u.create({ name: 'mazi' })
     return {
       stars: ++args.ri.stars
     }

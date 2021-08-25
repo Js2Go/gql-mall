@@ -6,6 +6,7 @@ import { graphqlUploadKoa } from 'graphql-upload'
 import { SubscriptionServer } from 'subscriptions-transport-ws'
 import { BaseRedisCache } from 'apollo-server-cache-redis'
 import Redis from 'ioredis'
+import { Sequelize } from 'sequelize'
 
 import upperDirective from '../directive/upperDirective'
 import restDirective from '../directive/restDirective'
@@ -21,7 +22,7 @@ interface NormalServer {
 const upper = upperDirective('upper')
 const rest = restDirective('rest')
 
-const startApolloServer = async (schema: GraphQLSchema, port: number) => {
+const startApolloServer = async (schema: GraphQLSchema, port: number, db: Sequelize) => {
   const server = new ApolloServer({
     schema,
     dataSources: () => ({
@@ -29,6 +30,9 @@ const startApolloServer = async (schema: GraphQLSchema, port: number) => {
     }),
     context: ({ ctx }) => {
       // console.log(ctx.req.headers.authorization)
+      return {
+        db
+      }
     },
     cache: new BaseRedisCache({
       client: new Redis({
@@ -90,10 +94,10 @@ const startNormalServer = (port: number, path: string): NormalServer => {
   return { app, httpServer }
 }
 
-export const start = async (port: number) => {
+export const start = async (port: number, db: Sequelize) => {
   try {
     const schema = await getSchemaWithResolvers()
-    startApolloServer(withDirectivesSchema(schema, [upper, rest]), port)
+    startApolloServer(withDirectivesSchema(schema, [upper, rest]), port, db)
   } catch (err) {
     throw new Error(err)
   }
