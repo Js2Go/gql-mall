@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon --exec \"ts-node\" src/server.ts",
-    "start:rest": "nodemon --exec \"ts-node\" src/rest/server.ts",
+    "start": "nodemon --exec \"ts-node\" src/app.ts",
+    "start:rest": "nodemon --exec \"ts-node\" src/rest/app.ts",
     "test": "jest"
   },
   "dependencies": {
